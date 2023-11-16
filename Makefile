@@ -36,4 +36,4 @@ gram.c: gram.y
 	$(YACC) -d -o $@ $^
 
 clean:
-	$(RM) scan.c gram.c $(OBJS) $(TARGET)
+	$(RM) scan.c gram.c gram.h $(OBJS) $(TARGET)
