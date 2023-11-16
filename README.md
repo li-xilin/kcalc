@@ -2,9 +2,12 @@
 
 ## Support
 
-The calculator support many basic math opeations, include:
+The calculator support many basic math operations, include:
 ```
-+, -, *, /, %, <<, >>, and, or, ~, pow(), sqrt(), Decimal output, Dexadecimal output
++, -, *, /, %, <<, >>, and, or, ~, pow(), sqrt(),
+d for decimal output,
+x for hexadecimal output
+
 ```
 
 ## Example
