@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+#include "util.h"
 #include <ax/u1024.h>
 #include "gram.h"
 #include <ax/edit.h>
@@ -33,6 +34,8 @@
 #include <string.h>
 
 ax_iobuf sg_expbuf;
+extern int result_base;
+extern ax_u1024 result_value;
 
 int yyparse();
 int yywrap();
@@ -51,6 +54,14 @@ void yyerror(const char *err)
 	ax_perror(err);
 }
 
+bool is_empty(const char *text)
+{
+	for (int i = 0; text[i]; i++)
+		if (text[i] != '\t' && text[i] != ' ' && text[i] != '\n')
+			return false;
+	return true;
+}
+
 int main()
 {
 	ax_log_set_mode(AX_LM_NOLOC|AX_LM_NOTIME);
@@ -58,14 +69,22 @@ int main()
 		char *line = ax_edit_readline("kc -> ");
 		if (!line)
 			break;
+
+		size_t len = strlen(line);
+
+		if (is_empty(line))
+			goto cont;
 		if (strcmp(line, "q") == 0)
 			break;
 		ax_edit_history_add(line);
 
-		size_t len = strlen(line);
 		ax_iobuf_init(&sg_expbuf, line, len + 1);
 		sg_expbuf.rear = len;
-		yyparse();
+		if (yyparse())
+			goto cont;
+		fprintf(stdout, "(%d) ", result_base);
+		print_u1024(&result_value, stdout, result_base);
+cont:
 		free(line);
 		yyrestart(stdin);
 	}

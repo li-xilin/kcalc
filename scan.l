@@ -24,6 +24,8 @@
 #include "scan.h"
 #include <ax/u1024.h>
 #include "gram.h"
+#include <ax/mem.h>
+
 #include <stdio.h>
 #include <limits.h>
 #include "gram.h"
@@ -64,33 +66,39 @@ other  .
 	if (strcmp(yytext, "sqrt") == 0)
 		return SQRT;
 	if (strcmp(yytext, "x") == 0)
-		return HEX;
+		return PRINTHEX;
 	if (strcmp(yytext, "d") == 0)
-		return DEC;
-	yylval.err = "Unknown keyword";
-	return ERROR;
+		return PRINTDEC;
+	if (strcmp(yytext, "b") == 0)
+		return PRINTBIN;
+	yylval.string = strdup(yytext);
+	return BADSYMBOL;
 }
 
 {decint} {
-	char *end;
-	uint64_t u64 = strtoll(yytext, &end, 10);
-	if (u64 == LLONG_MAX) {
-		yylval.err = "Dec number too long.";
+	char hexbuf[128 * 2];
+	char *p = ax_strbaseconv(yytext, hexbuf, sizeof hexbuf, 10, 16);
+	if (!p) {
+		yylval.error = "Dec number too big.";
 		return ERROR;
 	}
-	ax_u1024_from_int(&yylval.number, u64);
+	ax_u1024_from_string(&yylval.number, p, sizeof hexbuf - (p - hexbuf));
 	return NUMBER;
 }
 
 {hexint} {
 	char *end;
-	ax_u1024_from_string(&yylval.number, yytext + 2, strlen(yytext) - 2);
+	if (ax_u1024_from_string(&yylval.number, yytext + 2, strlen(yytext) - 2)) {
+		yylval.error = "Hex number too big.";
+		return ERROR;
+	}
 	return NUMBER;
 }
 
 {other} {
-	yylval.err = "Unexpected charactor.";
-	return ERROR;
+	puts("bad char");
+	yylval.bad_char = yytext[0];
+	return BADCHAR;
 }
 
 %%
