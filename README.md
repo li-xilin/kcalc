@@ -4,7 +4,7 @@
 
 ```
 Tokens: 
-    PRINT D E F G H I J K
+    PRINT EXP E F G H I J K
 Operators:
     ~, ^, *, /, %, +, -, <<, >>, and, xor, or
 Literal value:
@@ -25,7 +25,7 @@ Grammar:
     H -> H + I | H - I | I
     I -> I * J | I / J | I % J | J
     J -> K ^ J | K
-    K -> (D) | pow(D,D) | sqrt(D) | <literal value> | ~ K
+    K -> (EXP) | pow(EXP,EXP) | sqrt(EXP) | <literal value> | ~ K
 
 Copyright (c) Li Xilin <lixilin@gmx.com>
 ```
@@ -34,25 +34,23 @@ Copyright (c) Li Xilin <lixilin@gmx.com>
 
 ```
 $ ./kcalc
-kc -> d 0xffee
-65518
-kc -> x 0xffee
-0xffee
-kc -> d 52^8
-53459728531456
-kc -> d 52^62
-[ERROR] Result value too big
-kc -> d pow(100,2)
-10000
-kc -> pow(0x100, 2)
-0x10000
-kc -> d sqrt(81)
-9
-kc -> 0x0101 and 0x1010
-0x0
-kc -> 0x0101 or 0x1010
-0x1111
-kc -> 0xff << 3
-0x7f8
+kc -> 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF + 1
+(16) 10000000000000000000000000000000000000000000000
+kc -> d 0xF
+(10) 15
+kc -> 42 / 0
+[ERROR] The divisor cannot be zero.
+kc -> (0xFF + 1) ^ 42
+(16) 1000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+kc -> x sqrt(0x1000000000000000000000)
+(16) 40000000000
+kc -> 0 - 1
+(16) ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+kc -> 2 + (3 * 4) ^ 2
+(16) 92
+kc -> 0x10 << 1
+(16) 20
+kc -> 0x1010 xor 0x0101
+(16) 1111
 kc -> q
 ```
