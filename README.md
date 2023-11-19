@@ -13,11 +13,13 @@ Literal value:
 Functions:
     1. pow(x, p): x to the power of p.
     2. sqrt(x): square root of x.
-Print result:
-    1. 'x' for hexadecimal value output, default behavior.
-    2. 'd'  for decimal value output.
+Output format:
+    1. x: format the result in hexadecimal notation(default if omitted).
+    2. d: format the result in signed decimal notation.
+    3. u: format the result in unsigned decimal notation.
+    4. b: format the result in binary notation.
 Grammar:
-    EVAL -> x EXP | d EXP | EXP
+    EVAL -> x EXP | d EXP | u EXP | b EXP | EXP
     EXP -> EXP or E | E
     E -> E xor F | F
     F -> F and G | G
@@ -25,7 +27,8 @@ Grammar:
     H -> H + I | H - I | I
     I -> I * J | I / J | I % J | J
     J -> K ^ J | K
-    K -> (EXP) | pow(EXP,EXP) | sqrt(EXP) | <literal value> | ~ K
+    K -> (EXP) | pow(EXP,EXP) | sqrt(EXP) | <literal value>
+       | ~ K | + K | - K
 
 Copyright (c) Li Xilin <lixilin@gmx.com>
 ```
