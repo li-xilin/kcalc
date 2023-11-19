@@ -69,6 +69,8 @@ other  .
 		return PRINTHEX;
 	if (strcmp(yytext, "d") == 0)
 		return PRINTDEC;
+	if (strcmp(yytext, "u") == 0)
+		return PRINTUDEC;
 	if (strcmp(yytext, "b") == 0)
 		return PRINTBIN;
 	yylval.string = strdup(yytext);

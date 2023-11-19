@@ -40,13 +40,13 @@ ax_u1024 result_value;
 %token <bad_char> BADCHAR
 %token <string> BADSYMBOL
 %token <error> ERROR
-%token PRINTHEX PRINTDEC PRINTBIN
+%token PRINTHEX PRINTDEC PRINTUDEC PRINTBIN
 %token PLUS MINUS ASTERISK SLASH CARET LB RB COMMA PERCENT
 %token LSHIFT RSHIFT AND XOR OR TILDE
 %token POW SQRT
 %type <number> D E F G H I J K FATAL
 %type <result> ROOT PRINT
-%left ADD SUB TILDE
+%left PLUS MINUS TILDE
 %left UMINUS
 
 %union {
@@ -72,6 +72,10 @@ PRINT	: PRINTHEX D {
 		$$.base = 16;
 	}
 	| PRINTDEC D {
+      		$$.value = $2;
+		$$.base = -10;
+	}
+	| PRINTUDEC D {
       		$$.value = $2;
 		$$.base = 10;
 	}
@@ -142,13 +146,24 @@ I	: I ASTERISK J {
 	;
 
 J	: K CARET J { ax_u1024_pow(&$1, &$3, &$$); }
-	| K {$$ = $1;}
+	| K { $$ = $1; }
 	;
 K	: LB D RB { $$ = $2; }
 	| POW LB D COMMA D RB { ax_u1024_pow(&$3, &$5, &$$); }
 	| SQRT LB D RB { ax_u1024_isqrt(&$3, &$$); }
-	| NUMBER {$$ = $1;}
+	| NUMBER { $$ = $1; }
 	| TILDE K { ax_u1024_not(&$2, &$$); } %prec UMINUS
+	| PLUS K { $$ = $2; } %prec UMINUS
+	| MINUS K {
+		if ($2.array[AX_U1024_ARR_LEN - 1] >> 31) {
+			ax_u1024_not(&$2, &$$);
+			ax_u1024_inc(&$$);
+		}
+		else {
+			ax_u1024_dec(&$2);
+			ax_u1024_not(&$2, &$$);
+		}
+	} %prec UMINUS
 	| FATAL { 
 		YYERROR;
 	}
