@@ -65,6 +65,8 @@ other  .
 		return POW;
 	if (strcmp(yytext, "sqrt") == 0)
 		return SQRT;
+	if (strcmp(yytext, "log2") == 0)
+		return LOG2;
 	if (strcmp(yytext, "x") == 0)
 		return PRINTHEX;
 	if (strcmp(yytext, "d") == 0)
