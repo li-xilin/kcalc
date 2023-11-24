@@ -27,8 +27,9 @@ Grammar:
     H -> H + I | H - I | I
     I -> I * J | I / J | I % J | J
     J -> K ^ J | K
-    K -> (EXP) | pow(EXP,EXP) | sqrt(EXP) | <literal value>
-       | ~ K | + K | - K
+    K -> (EXP) | <literal value> | L
+    L -> ~ K | + K | - K | sqrt K | log2 K | M
+    M -> K !
 
 Copyright (c) Li Xilin <lixilin@gmx.com>
 ```

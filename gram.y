@@ -31,10 +31,8 @@
 #include <math.h>
 void yyerror(const char *msg);
 int yylex();
-static void u1024_log2(const ax_u1024 *a, ax_u1024 *b, bool floor);
 int result_base;
 ax_u1024 result_value;
-
 %} 
 
 %token <number> NUMBER
@@ -43,12 +41,13 @@ ax_u1024 result_value;
 %token <string> BADSYMBOL
 %token <error> ERROR
 %token PRINTHEX PRINTDEC PRINTUDEC PRINTBIN
-%token PLUS MINUS ASTERISK SLASH CARET LB RB COMMA PERCENT
+%token PLUS MINUS ASTERISK SLASH CARET LB RB COMMA PERCENT EXCLAM
 %token LSHIFT RSHIFT AND XOR OR TILDE
 %token SQRT LOG2
-%type <number> D E F G H I J K L FATAL
+%type <number> D E F G H I J K L M FATAL
 %type <result> ROOT PRINT
 %left PLUS MINUS TILDE
+%right EXCLAM
 %left UMINUS
 
 %union {
@@ -172,6 +171,10 @@ L	: TILDE K { ax_u1024_not(&$2, &$$); } %prec UMINUS
 	} %prec UMINUS
 	| SQRT K { ax_u1024_isqrt(&$2, &$$); } %prec UMINUS
 	| LOG2 K { u1024_log2(&$2, &$$, false); } %prec UMINUS
+	| M { $$ = $1; }
+	;
+
+M	: K EXCLAM { u1024_factorial(&$1, &$$); }
 	;
 
 FATAL	: BADCHAR {
@@ -195,40 +198,5 @@ FATAL	: BADCHAR {
 int yywrap()
 {
 	return 1;
-}
-
-static void u1024_log2(const ax_u1024 *a, ax_u1024 *b, bool floor)
-{
-	int idx = -1;
-	for (int i = AX_U1024_ARR_LEN; i >= 0; i--) {
-		if(a->array[i]) {
-			idx = i;
-			break;
-		}
-	}
-	if (idx == -1) {
-		ax_u1024_from_int(b, 0);
-	}
-	else {
-		bool have_one = false;
-		
-		uint32_t word = a->array[idx];
-		int bit = 0;
-		for (int i = 0; i < 32; i++) {
-			if ((word >> i) & 1)
-				bit = i;
-		}
-		if (floor) {
-			for (int i = 0; i < idx; i++) {
-				if(a->array[i] != 0) {
-					have_one = true;
-					break;
-				}
-			}
-			if (word != (1 << bit))
-				have_one = true;
-		}
-		ax_u1024_from_int(b, idx * 32 + bit + have_one);
-	}
 }
 

@@ -20,7 +20,7 @@
 
 TARGET = kcalc
 LEX = lex
-YACC = yacc
+YACC = yacc 
 OBJS = gram.o scan.o main.o util.o
 LDFLAGS += -laxkit -laxcore -lm
 CFLAGS += -O0 -g

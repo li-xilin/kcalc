@@ -51,6 +51,7 @@ other  .
 "<<"   return LSHIFT;
 ">>"   return RSHIFT;
 "~"    return TILDE;
+"!"    return EXCLAM;
 
 {space} {
 }

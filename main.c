@@ -65,8 +65,9 @@ static const char usage[] =
 	"\n" "    I -> I * J | I / J | I % J | J"
 	"\n" "    J -> K ^ J | K"
 	"\n" "    K -> (EXP) | <literal value> | L"
-	"\n" "    L ->  ~ K | + K | - K | sqrt K | log2 K"
-	"\n" ""
+	"\n" "    L ->  ~ K | + K | - K | sqrt K | log2 K | M"
+	"\n" "    M ->  K !"
+	"\n"
 	"\n" "Copyright (c) Li Xilin <lixilin@gmx.com>"
 	"\n";
 
