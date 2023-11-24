@@ -61,8 +61,6 @@ other  .
 		return OR;
 	if (strcmp(yytext, "xor") == 0)
 		return XOR;
-	if (strcmp(yytext, "pow") == 0)
-		return POW;
 	if (strcmp(yytext, "sqrt") == 0)
 		return SQRT;
 	if (strcmp(yytext, "log2") == 0)

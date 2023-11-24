@@ -31,7 +31,7 @@
 #include <math.h>
 void yyerror(const char *msg);
 int yylex();
-static void u1024_log2(const ax_u1024 *a, ax_u1024 *b);
+static void u1024_log2(const ax_u1024 *a, ax_u1024 *b, bool floor);
 int result_base;
 ax_u1024 result_value;
 
@@ -45,7 +45,7 @@ ax_u1024 result_value;
 %token PRINTHEX PRINTDEC PRINTUDEC PRINTBIN
 %token PLUS MINUS ASTERISK SLASH CARET LB RB COMMA PERCENT
 %token LSHIFT RSHIFT AND XOR OR TILDE
-%token POW SQRT LOG2
+%token SQRT LOG2
 %type <number> D E F G H I J K L FATAL
 %type <result> ROOT PRINT
 %left PLUS MINUS TILDE
@@ -153,7 +153,12 @@ J	: K CARET J { ax_u1024_pow(&$1, &$3, &$$); }
 K	: LB D RB { $$ = $2; }
 	| NUMBER { $$ = $1; }
 	| L { $$ = $1; }
-	| TILDE K { ax_u1024_not(&$2, &$$); } %prec UMINUS
+	| FATAL { 
+		YYERROR;
+	}
+	;
+
+L	: TILDE K { ax_u1024_not(&$2, &$$); } %prec UMINUS
 	| PLUS K { $$ = $2; } %prec UMINUS
 	| MINUS K {
 		if ($2.array[AX_U1024_ARR_LEN - 1] >> 31) {
@@ -165,14 +170,8 @@ K	: LB D RB { $$ = $2; }
 			ax_u1024_not(&$2, &$$);
 		}
 	} %prec UMINUS
-	| FATAL { 
-		YYERROR;
-	}
-	;
-
-L	: POW LB D COMMA D RB { ax_u1024_pow(&$3, &$5, &$$); }
-	| SQRT LB D RB { ax_u1024_isqrt(&$3, &$$); }
-	| LOG2 LB D RB { u1024_log2(&$3, &$$); }
+	| SQRT K { ax_u1024_isqrt(&$2, &$$); } %prec UMINUS
+	| LOG2 K { u1024_log2(&$2, &$$, false); } %prec UMINUS
 	;
 
 FATAL	: BADCHAR {
@@ -198,7 +197,7 @@ int yywrap()
 	return 1;
 }
 
-static void u1024_log2(const ax_u1024 *a, ax_u1024 *b)
+static void u1024_log2(const ax_u1024 *a, ax_u1024 *b, bool floor)
 {
 	int idx = -1;
 	for (int i = AX_U1024_ARR_LEN; i >= 0; i--) {
@@ -212,20 +211,23 @@ static void u1024_log2(const ax_u1024 *a, ax_u1024 *b)
 	}
 	else {
 		bool have_one = false;
-		for (int i = 0; i < idx; i++) {
-			if(a->array[i] != 0) {
-				have_one = true;
-				break;
-			}
-		}
+		
 		uint32_t word = a->array[idx];
 		int bit = 0;
 		for (int i = 0; i < 32; i++) {
 			if ((word >> i) & 1)
 				bit = i;
 		}
-		if (word != (1 << bit))
-			have_one = true;
+		if (floor) {
+			for (int i = 0; i < idx; i++) {
+				if(a->array[i] != 0) {
+					have_one = true;
+					break;
+				}
+			}
+			if (word != (1 << bit))
+				have_one = true;
+		}
 		ax_u1024_from_int(b, idx * 32 + bit + have_one);
 	}
 }
